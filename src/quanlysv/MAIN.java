@@ -1,47 +1,116 @@
 package quanlysv;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 
-import javax.swing.plaf.synth.SynthOptionPaneUI;
-
 public class MAIN {
 	// attributes:
-	public static Scanner sc = new Scanner(System.in);
 	public static List<Student> listStudent = new ArrayList<Student>();
-	public static Student sv = new Student();
+	public static Scanner sc = new Scanner(System.in);
 	//
+	// !_ note _! this is just init an object
+	// it will not create a connection
+	private static MysqlConnect mysqlConnect = new MysqlConnect();
+	private static Statement stmt;
+	private static PreparedStatement prpStmt;
 
 	// methods:
-	// clear console
-	public static void clearScreen() {
-		for (int i = 0; i < 50; ++i)
-			System.out.println();
-		System.out.flush();
+
+	// add all from DB to the arraylist
+	public static void addAll() {
+		try {
+			String sql = "SELECT * FROM `student`";
+			stmt = mysqlConnect.connect().createStatement();
+			ResultSet res = stmt.executeQuery(sql);
+			while (res.next()) {
+				Student sv = new Student();
+				sv.setId(res.getString("id"));
+				sv.setFullName(res.getString("fullName"));
+				sv.setClassId(res.getString("classId"));
+				sv.setAge(res.getInt("age"));
+				sv.setAddress(res.getString("address"));
+				if (res.getString("gender").equalsIgnoreCase("nam")) {
+					sv.setGender(true);
+				} else {
+					sv.setGender(false);
+				}
+				sv.setMaths(res.getFloat("maths"));
+				sv.setPhysics(res.getFloat("physics"));
+				sv.setChemistry(res.getFloat("chemistry"));
+				sv.setAverageScore(res.getFloat("averageScore"));
+				listStudent.add(sv);
+			}
+			// Clean-up environment
+			res.close();
+			stmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (SQLException se2) {
+			} // nothing we can do
+			mysqlConnect.disconnect();
+		}
 	}
-	//
 
 	// chuc nang 1
 	public static void nhapDS() {
-		System.out.printf("->Nhap sinh vien thu %d:%n", listStudent.size() + 1);
-		sv.nhap();
-		sv.setAverageScore((sv.getMaths() + sv.getPhysics() + sv.getChemistry()) / 3);
-		listStudent.add(sv);
-		String c = "";
-		do {
-			System.out.println("--->Ban co muon nhap tiep khong: Y/N?");
-			c = sc.nextLine();
-			if (c.equalsIgnoreCase("y")) {
-				nhapDS();
-			} else if (c.equalsIgnoreCase("n")) {
-				System.out.println("Tro ve menu!");
-				break;
+		try {
+			Student sv = new Student();
+			System.out.printf("->Nhap sinh vien thu %d:%n", listStudent.size() + 1);
+			sv.nhap();
+			sv.setAverageScore((sv.getMaths() + sv.getPhysics() + sv.getChemistry()) / 3);
+			listStudent.add(sv);
+
+			String sql = "INSERT INTO student VALUES(?,?,?,?,?,?,?,?,?,?)";
+			prpStmt = mysqlConnect.connect().prepareStatement(sql);
+			prpStmt.setString(1, sv.getId());
+			prpStmt.setString(2, sv.getFullName());
+			prpStmt.setString(3, sv.getClassId());
+			prpStmt.setInt(4, sv.getAge());
+			prpStmt.setString(5, sv.getAddress());
+			if (sv.isGender()) {
+				prpStmt.setString(6, "Nam");
 			} else {
-				System.out.println("!!!Da xay ra loi. Nhap lai!");
+				prpStmt.setString(6, "Nu");
 			}
-		} while (!c.equalsIgnoreCase("y") && !c.equalsIgnoreCase("n")); // nguoi dung nhap # "y" va "n"
+			prpStmt.setDouble(7, sv.getMaths());
+			prpStmt.setDouble(8, sv.getPhysics());
+			prpStmt.setDouble(9, sv.getChemistry());
+			prpStmt.setDouble(10, sv.getAverageScore());
+			prpStmt.execute();
+			prpStmt.close();
+			String c = "";
+			do {
+				System.out.println("--->Ban co muon nhap tiep khong: Y/N?");
+				c = sc.nextLine();
+				if (c.equalsIgnoreCase("y")) {
+					nhapDS();
+				} else if (c.equalsIgnoreCase("n")) {
+					System.out.println("Tro ve menu!");
+					break;
+				} else {
+					System.out.println("!!!Da xay ra loi. Nhap lai!");
+				}
+			} while (!c.equalsIgnoreCase("y") && !c.equalsIgnoreCase("n")); // nguoi dung nhap # "y" va "n"
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (prpStmt != null)
+					prpStmt.close();
+			} catch (SQLException se2) {
+			} // nothing we can do
+			mysqlConnect.disconnect();
+		}
 	}
 	//
 
@@ -295,8 +364,41 @@ public class MAIN {
 			for (int i = 0; i < listStudent.size(); i++) {
 				if (s.equalsIgnoreCase(listStudent.get(i).getId())) { // tim thay
 					System.out.println("Da tim thay! Nhap thong tin moi:");
-					listStudent.get(i).nhap();
+					Student sv = listStudent.get(i);
 					count++;
+					sv.nhap();
+					try {
+						String sql = "UPDATE student SET VALUES(?,?,?,?,?,?,?,?,?,?) WHERE id = ?";
+						prpStmt = mysqlConnect.connect().prepareStatement(sql);
+						prpStmt.setString(1, sv.getId());
+						prpStmt.setString(2, sv.getFullName());
+						prpStmt.setString(3, sv.getClassId());
+						prpStmt.setInt(4, sv.getAge());
+						prpStmt.setString(5, sv.getAddress());
+						if (sv.isGender()) {
+							prpStmt.setString(6, "Nam");
+						} else {
+							prpStmt.setString(6, "Nu");
+						}
+						prpStmt.setDouble(7, sv.getMaths());
+						prpStmt.setDouble(8, sv.getPhysics());
+						prpStmt.setDouble(9, sv.getChemistry());
+						prpStmt.setDouble(10, sv.getAverageScore());
+						prpStmt.setString(11, s);
+						prpStmt.execute();
+						System.out.println("Cap nhat thanh cong!");
+						// clean-up the environment
+						prpStmt.close();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					} finally {
+						try {
+							if (prpStmt != null)
+								prpStmt.close();
+						} catch (SQLException se2) {
+						} // nothing we can do
+						mysqlConnect.disconnect();
+					}
 				}
 			}
 			if (count == 0) {
@@ -328,9 +430,18 @@ public class MAIN {
 			int count = 0;
 			for (int i = 0; i < listStudent.size(); i++) {
 				if (s.equalsIgnoreCase(listStudent.get(i).getId())) { // tim thay
+					Student sv = listStudent.get(i);
 					listStudent.remove(i);
-					System.out.println("Xoa thanh cong!");
 					count++;
+					try {
+						String sql = "DELETE FROM student WHERE id = ?";
+						prpStmt = mysqlConnect.connect().prepareStatement(sql);
+						prpStmt.setString(1, s);
+						prpStmt.execute();
+						System.out.println("Xoa thanh cong!");
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
 				}
 			}
 			if (count == 0) {
@@ -361,8 +472,8 @@ public class MAIN {
 
 	// menu chuong trinh
 	public static void menu() {
+		addAll(); // nap du lieu tu DB vao arrlist
 		while (true) {
-//			clearScreen();
 			System.out.println("**********************************************");
 			System.out.println("**    	CHUONG TRINH QUAN LY SINH VIEN    	");
 			System.out.println();
@@ -406,11 +517,11 @@ public class MAIN {
 				break;
 			case 6:
 				System.out.println("--->Ban da chon sua thong tin sinh vien:");
-//				suaThongTin();
+				suaThongTin();
 				break;
 			case 7:
 				System.out.println("--->Ban da chon xoa sinh vien:");
-//				xoaSinhVien();
+				xoaThongTin();;
 				break;
 			case 8:
 				System.out.println("--->Xoa database:");
@@ -423,7 +534,7 @@ public class MAIN {
 					System.out.println("Ban co muon thoat chuong trinh: Y/N?");
 					c = sc.nextLine();
 					if (c.equalsIgnoreCase("y")) {
-						return; // thoat khoi ham
+						return; // thoat khoi ham main
 					} else if (c.equalsIgnoreCase("n")) {
 						break; // break vong do-while
 					} else {

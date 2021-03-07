@@ -6,8 +6,8 @@ import java.util.TreeMap;
 
 public class Student {
 	// attributes;
-	private String fullName;
 	private String id;
+	private String fullName;
 	private String classId;
 	private Integer age;
 	private String address;
@@ -16,7 +16,8 @@ public class Student {
 	private Float physics;
 	private Float chemistry;
 	private Float averageScore;
-
+	
+	//map check id trung
 	public static Map<String, Integer> mapId = new TreeMap<String, Integer>();
 	// size cua map = so luong key;
 	//
@@ -103,7 +104,7 @@ public class Student {
 	}
 	//
 
-	// constructor:
+	// constructor: if class has not any contructor then compiler will auto generate a default contructor
 	public Student() {
 		super();
 	}
@@ -218,7 +219,7 @@ public class Student {
 		} else {
 			strGender = "nu";
 		}
-		System.out.printf("%-20s%-20d%-20s%-20s%-20s%-20s%-5.1f%-5.1f%-5.1f%-30.1f", getFullName(), getAge(), strGender,
+		System.out.printf("%-20s%-20d%-20s%-20s%-20s%-20s%-5.1f%-5.1f%-5.1f%-30.2f", getFullName(), getAge(), strGender,
 				getAddress(), getId(), getClassId(), getMaths(), getPhysics(), getChemistry(), getAverageScore());
 		System.out.println();
 	}
