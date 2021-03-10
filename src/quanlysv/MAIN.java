@@ -486,7 +486,6 @@ public class MAIN {
 			System.out.println("**	6. Sua thong tin sinh vien.				");
 			System.out.println("** 	7. Xoa sinh vien.						"); // remove from list and disable from
 																				// database;
-			System.out.println("**	8. Xoa database.						");
 			System.out.println("** 	0. Thoat chuong trinh.					");
 			System.out.println("**********************************************");
 			System.out.println("** 	Nhap lua chon cua ban:					");
@@ -522,10 +521,6 @@ public class MAIN {
 			case 7:
 				System.out.println("--->Ban da chon xoa sinh vien:");
 				xoaThongTin();;
-				break;
-			case 8:
-				System.out.println("--->Xoa database:");
-//				xoaDb();
 				break;
 			case 0:
 				System.out.println("--->Ban da chon thoat chuong trinh:");
