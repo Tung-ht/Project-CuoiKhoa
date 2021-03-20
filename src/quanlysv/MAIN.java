@@ -261,7 +261,8 @@ public class MAIN {
 					System.out.printf("%-5s%-20s%-20s%-20s%-20s%-20s%-20s%-5s%-5s%-5s%-30s%n", "STT", "Ten", "Tuoi",
 							"Gioi tinh", "Dia chi", "MSSV", "Ma lop", "Toan", "Ly", "Hoa", "Diem trung binh");
 				}
-				if (listStudent.get(i).getFullName().contains(s)) {
+				if (listStudent.get(i).getFullName().toLowerCase().contains(s.toLowerCase())) {
+					System.out.printf("%-5d", (count + 1));
 					listStudent.get(i).xuat();
 					count++;
 				}
@@ -296,6 +297,7 @@ public class MAIN {
 			System.out.println("2. Nu.");
 			System.out.println("Nhap lua chon cua ban:");
 			int key = sc.nextInt();
+			sc.nextLine();
 			int count = 0;
 			switch (key) {
 			case 1:
@@ -307,6 +309,7 @@ public class MAIN {
 								"Gioi tinh", "Dia chi", "MSSV", "Ma lop", "Toan", "Ly", "Hoa", "Diem trung binh");
 					}
 					if (listStudent.get(i).isGender()) {
+						System.out.printf("%-5d", (count + 1));
 						listStudent.get(i).xuat();
 						count++;
 					}
@@ -324,6 +327,7 @@ public class MAIN {
 								"Gioi tinh", "Dia chi", "MSSV", "Ma lop", "Toan", "Ly", "Hoa", "Diem trung binh");
 					}
 					if (!listStudent.get(i).isGender()) {
+						System.out.printf("%-5d", (count + 1));
 						listStudent.get(i).xuat();
 						count++;
 					}
@@ -367,8 +371,9 @@ public class MAIN {
 					Student sv = listStudent.get(i);
 					count++;
 					sv.nhap();
+					sv.setAverageScore((sv.getMaths()+sv.getPhysics()+sv.getChemistry())/3);
 					try {
-						String sql = "UPDATE student SET VALUES(?,?,?,?,?,?,?,?,?,?) WHERE id = ?";
+						String sql = "UPDATE student SET id = ?, fullName = ?, classId = ?, age = ?, address = ?, gender = ?, maths = ?, physics = ?, chemistry = ?, averageScore = ? WHERE id = ?;";
 						prpStmt = mysqlConnect.connect().prepareStatement(sql);
 						prpStmt.setString(1, sv.getId());
 						prpStmt.setString(2, sv.getFullName());
